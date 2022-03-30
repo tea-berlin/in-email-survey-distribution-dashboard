@@ -2,7 +2,7 @@
 
 ### Context
 
-The **in-email-survey-counter** repo is part of the in-email-survey-project. It hosts the code of the webpage that collects clicks from survey respondents.
+The **in-email-survey-distribution-dashboard** repo is part of the in-email-survey-project. It hosts the code of the streamlit dashboard for sending out the surveys.
 
 Survey respondents receive emails via Amazon SES containing HTML formatted survey questions. The answering options are displayed as buttons. Each button links to the website that is to be built collaboratively here in the **In-email Survey Counter** repository. The urls underlying each button do not only open the web page, they also transfer various attributes via the url to identify:
 - the question that was asked (in the form of a *question code*),
