@@ -42,10 +42,14 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-6. now that all dependencies are installed, you can start the streamlit application
+6. rename `.env.example` to `.env`
+
+7. start the streamlit application
 
 ```
 streamlit run app.py
 ```
 
-7. check out [streamlit.io](https://streamlit.io/), it is an amazing library
+### Resources
+
+- check out [streamlit.io](https://streamlit.io/), it is an amazing library
