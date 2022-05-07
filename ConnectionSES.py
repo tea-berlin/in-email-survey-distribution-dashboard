@@ -1,19 +1,16 @@
+from xml.etree.ElementTree import tostring
 import boto3, os
 from dotenv import load_dotenv
 from botocore.exceptions import ClientError
+import pandas as pd
+from sqlalchemy import create_engine
+import pymysql
 
 load_dotenv()
-sender='waelcodezilla@gmail.com'
-receiver='waelcodezilla@gmail.com'
-subject='Test Email'
-message='Hello World!'
+password = os.environ["password"]
 region_name = os.environ["region_name"]
 aws_access_key_id=os.environ["aws_access_key_id"]
 aws_secret_access_key=os.environ["aws_secret_access_key"]
-#print(aws_access_key_id)
-#print(aws_secret_access_key)
-#client = boto3.client('ses',region_name=region_name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
-#response=client.send_email(Destination={'ToAddressess':[receiver],}, Message={message}, )
 
 # Replace sender@example.com with your "From" address.
 # This address must be verified with Amazon SES.
@@ -21,18 +18,14 @@ SENDER = "Sender Name <waelcodezilla@gmail.com>"
 
 # Replace recipient@example.com with a "To" address. If your account 
 # is still in the sandbox, this address must be verified.
-RECIPIENT = "waelcodezilla@gmail.com"
 
+# The subject line for the email.
+SUBJECT = "Amazon SES Test (SDK for Python)"
 # Specify a configuration set. If you do not want to use a configuration
 # set, comment the following variable, and the 
 # ConfigurationSetName=CONFIGURATION_SET argument below.
 #CONFIGURATION_SET = "ConfigSet"
-
 # If necessary, replace us-west-2 with the AWS Region you're using for Amazon SES.
-AWS_REGION = os.environ["region_name"]
-
-# The subject line for the email.
-SUBJECT = "Amazon SES Test (SDK for Python)"
 
 # The email body for recipients with non-HTML email clients.
 BODY_TEXT = ("Amazon SES Test (Python)\r\n"
@@ -56,13 +49,25 @@ BODY_HTML = """<html>
 # The character encoding for the email.
 CHARSET = "UTF-8"
 
-# Create a new SES resource and specify a region.
-client = boto3.client('ses',region_name=AWS_REGION)
+# Connection between Boto3 and AWS SES service. 
+clientses = boto3.client('ses',region_name=region_name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
 
-# Try to send the email.
+
+# Connection between in email survey distribution dashboard and AWS RDS MySQL DB.
+# Fetch the emails from the survey table. 
+db = pymysql.connect(host="in-email-survey-db.ckwsrtisuili.eu-central-1.rds.amazonaws.com",user = "Admin",password = password, database='in_email_survey_db')
+cursor = db.cursor()
+cursor.execute("SELECT User_email FROM survey;")
+emails = cursor.fetchall()
+
+# Iteration and sending emails over the list of emails addresses tuples.
+i=0
+for i,tuple in enumerate(emails):
+    RECIPIENT = tuple[0]
+    print(tuple[0])
 try:
     #Provide the contents of the email.
-    response = client.send_email(
+    response = clientses.send_email(
         Destination={
             'ToAddresses': [
                 RECIPIENT,
