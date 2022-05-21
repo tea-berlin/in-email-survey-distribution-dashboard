@@ -51,7 +51,7 @@ CHARSET = "UTF-8"
 
 # Connection between Boto3 and AWS SES service. 
 clientses = boto3.client('ses',region_name=region_name, aws_access_key_id=aws_access_key_id, aws_secret_access_key=aws_secret_access_key)
-
+verifiedemails = clientses.list_verified_email_addresses()
 
 # Connection between in email survey distribution dashboard and AWS RDS MySQL DB.
 # Fetch the emails from the survey table. 
@@ -64,39 +64,30 @@ emails = cursor.fetchall()
 i=0
 for i,tuple in enumerate(emails):
     RECIPIENT = tuple[0]
-    print(tuple[0])
-try:
-    #Provide the contents of the email.
-    response = clientses.send_email(
-        Destination={
-            'ToAddresses': [
-                RECIPIENT,
-            ],
-        },
-        Message={
-            'Body': {
+    if RECIPIENT in verifiedemails['VerifiedEmailAddresses']:
+        try:
+                #Provide the contents of the email.
+                 response = clientses.send_email(Destination={'ToAddresses': [RECIPIENT,],},Message={
+                'Body': {
                 'Html': {
                     'Charset': CHARSET,
-                    'Data': BODY_HTML,
-                },
+                    'Data': BODY_HTML,},
                 'Text': {
                     'Charset': CHARSET,
-                    'Data': BODY_TEXT,
-                },
-            },
-            'Subject': {
+                    'Data': BODY_TEXT,},},
+                'Subject': {
                 'Charset': CHARSET,
-                'Data': SUBJECT,
-            },
-        },
-        Source=SENDER,
-        # If you are not using a configuration set, comment or delete the
-        # following line
-        #ConfigurationSetName=CONFIGURATION_SET,
-    )
-# Display an error if something goes wrong.	
-except ClientError as e:
-    print(e.response['Error']['Message'])
-else:
-    print("Email sent! Message ID:"),
-    print(response['MessageId'])
+                'Data': SUBJECT,},},Source=SENDER,
+                # If you are not using a configuration set, comment or delete the
+                # following line
+                 #ConfigurationSetName=CONFIGURATION_SET,
+                 )
+                # Display an error if something goes wrong.	
+        except ClientError as e:
+                              print(e.response['Error']['Message'])
+        else :
+                              print("Email sent! Message ID:"),
+                              print(response['MessageId'])
+    else:
+        print(RECIPIENT + " Email is not Verified")
+
